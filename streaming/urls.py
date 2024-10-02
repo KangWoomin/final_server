@@ -4,5 +4,7 @@ from .views import *
 app_name = 'streaming'
 
 urlpatterns = [
-    path('',view=main, name='main'),
+    path('',view=main, name='streaming/main'),
+
+    path('upload_video/', view=upload_video, name='streaming/upload_video'),
 ]
