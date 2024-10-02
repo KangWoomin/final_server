@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from rest_framework.response import Response
+# from rest_framework.response import Response
 # Create your views here.
 from .forms import *
 def main(request):
@@ -38,7 +38,7 @@ def upload_video(request):
             video_name = form.cleaned_data.get('video').name
 
             record_video(video_path, video_name)
-            return Response({'message':'비디오 저장 완료'}, status=200)
+            # return Response({'message':'비디오 저장 완료'}, status=200)
         else:
             form = VideoUploadForm()
         
