@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from rest_framework.response import Response
 # Create your views here.
 from .forms import *
 def main(request):
@@ -15,14 +16,15 @@ def record_video(video_path,video_name, duration=60):
 
     start_time = time.time()
 
-    while int(time.time()) - start_time<duration:
-        ret, frame = cv2.read()
-
-        if ret:
-            out.write(frame)
-        else:
+    while cap.isOpened():
+        ret, frame = cap.read()
+    
+        if not ret:
             break
-
+    
+        if time.time() - start_time >= duration:
+            out.write(frame)
+    
     cap.release()
     out.release()
     cv2.destroyAllWindows()
@@ -30,10 +32,13 @@ def record_video(video_path,video_name, duration=60):
 
 def upload_video(request):
     if request.method == 'POST':
-        form = VideoUploadForm(request.POST, request.FIELS)
+        form = VideoUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            video_path = request.FIELS['video']
+            video_path = request.FILES.get('video').temporary_file_path()
+            video_name = form.cleaned_data.get('video').name
 
+            record_video(video_path, video_name)
+            return Response({'message':'비디오 저장 완료'}, status=200)
         else:
             form = VideoUploadForm()
         
