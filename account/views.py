@@ -7,7 +7,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 
 def main(request):
-    return render(request, 'base.html')
+    return render(request, 'main.html')
 
 def create_user(request):
     if request.method == 'POST':
