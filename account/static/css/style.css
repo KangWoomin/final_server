@@ -1,0 +1,28 @@
+.top{
+    position: fixed;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: antiquewhite;
+    padding: 0.4rem;
+    box-shadow: 0 0.2remd 0.4rem rgba(0,0,0,0.2);
+}
+.center{
+    flex: 1;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+}
+.right{
+    display: flex;
+    margin-right: 1.3rem;
+}
+.content{
+    width: 80%;
+    margin: 10% auto;
+    padding: 0.5rem;
+    background-color: beige;
+    box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1);
+    border-radius: 10%;
+}
