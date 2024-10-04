@@ -7,8 +7,37 @@
 {%endblock%}
 
 {%block content%} 
+    
+        <div style="display: flex; text-align: center;">
+            <table border="1 solid black">
+                <thead>
+                    <tr>
+                        <th>
+                            ID
+                        </th>
+                        <th>
+                            경로
+                        </th>
+                        <th>
+                            업로드 시간
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in data %}
+                    <tr>
+                        <td>i.id</td>
+                        <td>i.path</td>
+                        <td>i.upload_at</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
     <video width="100%" height="100%" controls>
         <source src="{{video_url}}" type="video/mp.4">
-
+        비디오가 없음
     </video>
+    <a href="{%url 'main'%}">뒤로 가기</a>
 {%endblock%}
