@@ -16,7 +16,7 @@
     <div style="text-align: center;">
         <form action="{% url 'streaming:upload_video' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token%}
-            <input type="file" name="video">
+            <!-- <input type="file" name="video"> -->
             <button>업로드 테스트</button>
         </form>
 

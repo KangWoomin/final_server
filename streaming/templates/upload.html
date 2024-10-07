@@ -14,4 +14,25 @@
         </p>
     </div>
 
+    <video id="camera" autoplay playsinline></video>
+
+    <!-- 카메라 정보를 받아 스트리밍 되는지 확인 -->
+    <script>
+        const video = document.getElementById('camera')
+
+        async function startCamera() {
+            try{
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {facingMode: 'environment'},
+                    audio : false
+                });
+                video.srcObject = stream;
+            }catch (err){
+                console.error('카메라 스트리밍 오류:', err);
+            }
+        }
+
+        window.onload = startCamera;
+    </script>
+
 {%endblock%}
