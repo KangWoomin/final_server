@@ -8,4 +8,6 @@ urlpatterns = [
 
     path('stream_video/<str:filename>', view=stream_video, name='stream_video'),
     path('upload_video/', view=upload_video, name='upload_video'),
+
+  
 ]

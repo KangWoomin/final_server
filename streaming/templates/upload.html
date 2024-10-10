@@ -4,35 +4,33 @@
 비디오 업로드
 {%endblock%}
 
+{% block head %} 
+
+{%endblock%}
+
+
 {%block content%}
-
-    <div>
-        <p>
-            {% if form %}
-                {{form}}
-            {% endif %}
-        </p>
-    </div>
-
-    <video id="camera" autoplay playsinline></video>
-
-    <!-- 카메라 정보를 받아 스트리밍 되는지 확인 -->
+    <iframe src="http://10.0.66.136:81/stream" width="640" height="480" frameborder="0"></iframe>
+    <canvas id="video-canvas"></canvas>
+    <!-- 1분 영상 저장 버튼 -->
+    <button id="save-video">1분 동안 영상 저장</button>
     <script>
-        const video = document.getElementById('camera')
+        const videoElement = document.getElementById('video');
+        const socket = new WebSocket('ws://10.0.66.78:8000/ws/stream/');
 
-        async function startCamera() {
-            try{
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {facingMode: 'environment'},
-                    audio : false
-                });
-                video.srcObject = stream;
-            }catch (err){
-                console.error('카메라 스트리밍 오류:', err);
-            }
-        }
+        socket.onmessage = function(event) {
+            const blob = new Blob([event.data], { type: 'image/jpeg' });
+            videoElement.src = URL.createObjectURL(blob);
+        };
 
-        window.onload = startCamera;
+        socket.onclose = function(event) {
+            console.error('WebSocket closed:', event);
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
     </script>
 
+    
 {%endblock%}

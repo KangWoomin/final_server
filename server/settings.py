@@ -27,10 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+ASGI_APPLICATION = 'server.asgi.application'
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'corsheaders',
     'account',
     'streaming',
     'django.contrib.admin',
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -69,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'server.wsgi.application'
+
 
 
 # Database
@@ -129,3 +132,28 @@ AUTH_USER_MODEL = 'account.User'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 모든 도메인에서 접근 허용
+CORS_ALLOW_ALL_ORIGINS = True
+
+class COOPMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response['Cross-Origin-Opener-Policy'] = 'same-origin'  # 또는 'unsafe-allow-popups' 등 필요에 따라 조정
+        return response
+    
+
+
+# server/settings.py
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('10.0.66.78', 6379)],  # Redis 서버 주소와 포트
+        },
+    },
+}
