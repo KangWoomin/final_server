@@ -145,7 +145,7 @@ class COOPMiddleware:
         response['Cross-Origin-Opener-Policy'] = 'same-origin'  # 또는 'unsafe-allow-popups' 등 필요에 따라 조정
         return response
     
-
+ASGI_APPLICATION = 'server.asgi.application'
 
 # server/settings.py
 

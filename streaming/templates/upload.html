@@ -16,9 +16,10 @@
     <button id="save-video">1분 동안 영상 저장</button>
     <script>
 
-const videoElement = document.getElementById('video');
+        const videoElement = document.getElementById('video');
         const canvas = document.getElementById('video-canvas');
         const context = canvas.getContext('2d');
+        function connectWebSocket() {
         const socket = new WebSocket('ws://10.0.66.78:8000/ws/stream/');
         
         let mediaRecorder;
@@ -43,7 +44,11 @@ const videoElement = document.getElementById('video');
 
         socket.onclose = function(event) {
             console.error('WebSocket closed:', event);
-        };
+            setTimeout(() => {
+                console.log('Attempting to reconnect...');
+                connectWebSocket(); // 재연결 함수 호출
+            }, 1000); // 1초 후 재연결 시도
+                };
 
         socket.onerror = function(error) {
             console.error('WebSocket error:', error);
@@ -89,6 +94,9 @@ const videoElement = document.getElementById('video');
                 }, 60000); // 1분
             }
         });
+    }
+
+    connectWebSocket();
     </script>
     
 
