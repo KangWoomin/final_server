@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from . import consumers
 
 app_name = 'streaming'
 
@@ -10,4 +11,8 @@ urlpatterns = [
     path('upload_video/', view=upload_video, name='upload_video'),
 
   
+]
+
+websocket_urlpatterns = [
+    path('ws/stream/', consumers.StreamConsumer.as_asgi()),
 ]

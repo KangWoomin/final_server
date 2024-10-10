@@ -10,17 +10,35 @@
 
 
 {%block content%}
-    <iframe src="http://10.0.66.136:81/stream" width="640" height="480" frameborder="0"></iframe>
+    <iframe id="video" src="http://10.0.66.136:81/stream" width="640" height="480" frameborder="0"></iframe>
     <canvas id="video-canvas"></canvas>
     <!-- 1분 영상 저장 버튼 -->
     <button id="save-video">1분 동안 영상 저장</button>
     <script>
-        const videoElement = document.getElementById('video');
+
+const videoElement = document.getElementById('video');
+        const canvas = document.getElementById('video-canvas');
+        const context = canvas.getContext('2d');
         const socket = new WebSocket('ws://10.0.66.78:8000/ws/stream/');
+        
+        let mediaRecorder;
+        let recordedChunks = [];
+        let recording = false;
+
+        socket.onopen = function(event) {
+            console.log('WebSocket is open now.');
+        };
 
         socket.onmessage = function(event) {
             const blob = new Blob([event.data], { type: 'image/jpeg' });
             videoElement.src = URL.createObjectURL(blob);
+
+            if (recording) {
+                // 캔버스에 현재 비디오 프레임을 그립니다.
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                // 현재 캔버스 데이터를 비디오 스트림으로 전송합니다.
+                context.canvas.captureStream(30); // FPS를 설정합니다.
+            }
         };
 
         socket.onclose = function(event) {
@@ -30,7 +48,49 @@
         socket.onerror = function(error) {
             console.error('WebSocket error:', error);
         };
+
+        document.getElementById('save-video').addEventListener('click', function() {
+            // 1분 동안 비디오를 저장합니다.
+            if (!recording) {
+                recordedChunks = []; // 이전 기록 초기화
+                recording = true;
+
+                // 캡처 스트림 생성
+                const stream = canvas.captureStream(30); // FPS 설정 (30fps)
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+
+                mediaRecorder.ondataavailable = function(event) {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = function() {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // 비디오 다운로드 링크 생성
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'recorded_video.webm'; // 파일 이름
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+
+                mediaRecorder.start();
+                console.log('Recording started.');
+
+                // 1분 후에 캡처를 종료합니다.
+                setTimeout(function() {
+                    mediaRecorder.stop();
+                    recording = false;
+                    console.log('Recording stopped.');
+                }, 60000); // 1분
+            }
+        });
     </script>
+    
 
     
 {%endblock%}
