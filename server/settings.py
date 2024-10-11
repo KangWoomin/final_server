@@ -31,6 +31,7 @@ ASGI_APPLICATION = 'server.asgi.application'
 # Application definition
 
 INSTALLED_APPS = [
+    'redis',
     'rest_framework',
     'daphne',
     'channels',
