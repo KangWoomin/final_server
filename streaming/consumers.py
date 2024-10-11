@@ -11,9 +11,10 @@ import asyncio  # asyncio를 import
 
 class StreamConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
+        
         stream_url = "http://10.0.66.137:81/stream"
         await self.send(stream_url)
+        await self.accept()
 
     async def disconnect(self, code):
         await super().disconnect(code)

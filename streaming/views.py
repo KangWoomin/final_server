@@ -57,8 +57,27 @@ def stream_video(request, filename):
 
     return response
 
-
-
+import os
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def upload_video(request):
     return render(request,'upload.html')
+
+
+@csrf_exempt
+def upload(request):
+    if request.method == "POST" and request.FILES['video']:
+        video_file = request.FILES['video']
+        save_path = os.path.join(settings.MEDIA_ROOT, 'video', video_file.name)
+
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        with open(save_path, 'wb+')as f:
+            for chunk in video_file.chunks():
+                f.write(chunk)
+    
+        return JsonResponse({"message":"비디오 업로드 성공",'file_path':save_path})
+    
+    return JsonResponse({"error":"유요한 결과"},status=400)

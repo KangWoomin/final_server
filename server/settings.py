@@ -31,6 +31,8 @@ ASGI_APPLICATION = 'server.asgi.application'
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'dephne',
     'channels',
     'corsheaders',
     'account',
@@ -153,7 +155,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('10.0.66.78', 6379)],  # Redis 서버 주소와 포트
+            "hosts": [(os.environ.get('REDIS_HOST','localhost'), 6379)],  # Redis 서버 주소와 포트
         },
     },
 }
