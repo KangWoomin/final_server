@@ -65,19 +65,24 @@ from django.views.decorators.csrf import csrf_exempt
 def upload_video(request):
     return render(request,'upload.html')
 
-
+import datetime
+import subprocess
 @csrf_exempt
 def upload(request):
     if request.method == "POST" and request.FILES['video']:
         video_file = request.FILES['video']
-        save_path = os.path.join(settings.MEDIA_ROOT, 'video', video_file.name)
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+        save_path = os.path.join(settings.MEDIA_ROOT, 'video', f"{timestamp}.mp4")
 
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
         with open(save_path, 'wb+')as f:
             for chunk in video_file.chunks():
                 f.write(chunk)
-    
+        output_path = save_path.replace('.webm', '.mp4')
+        command = ['ffmpeg', '-i', save_path, output_path]
+        subprocess.run(command)
+
         return JsonResponse({"message":"비디오 업로드 성공",'file_path':save_path})
     
-    return JsonResponse({"error":"유요한 결과"},status=400)
+    return JsonResponse({"error":"POST로 전달 해야합니다."},status=400)
