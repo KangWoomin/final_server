@@ -20,7 +20,7 @@
         const canvas = document.getElementById('video-canvas');
         const context = canvas.getContext('2d');
         function connectWebSocket() {
-        const socket = new WebSocket('ws://localhost:8000/ws/stream');
+        const socket = new WebSocket('ws://localhost:8000/ws/stream/');
         
         let mediaRecorder;
         let recordedChunks = [];

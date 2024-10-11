@@ -32,7 +32,7 @@ ASGI_APPLICATION = 'server.asgi.application'
 
 INSTALLED_APPS = [
     'rest_framework',
-    'dephne',
+    'daphne',
     'channels',
     'corsheaders',
     'account',
