@@ -10,8 +10,10 @@
 
 
 {%block content%}
+    <!-- <video id="video" src="http://10.0.66.136:81/stream" muted playsinline></video> -->
+    
     <iframe id="video" src="http://10.0.66.136:81/stream" width="640" height="480" frameborder="0"></iframe>
-    <canvas id="video-canvas" ></canvas>
+    <canvas id="video-canvas"></canvas>
     <!-- 1분 영상 저장 버튼 -->
     <button id="save-video">1분 동안 영상 저장</button>
     <script>
@@ -31,15 +33,15 @@
         };
 
         socket.onmessage = function(event) {
-            const blob = new Blob([event.data], { type: 'image/jpeg' });
+            const blob = new Blob([event.data], { type: 'video/mp4' });
             const url = URL.createObjectURL(blob);
             videoElement.src = url;
 
-            if (recording) {
+            videoElement.onload=function(){
                 
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                context.canvas.captureStream(30); 
+                console.log("image drawn on canvas")
+                // context.canvas.captureStream(30); 
             }
         };
 
@@ -67,6 +69,8 @@
                 mediaRecorder.ondataavailable = function(event) {
                     if (event.data.size > 0) {
                         recordedChunks.push(event.data);
+                    }else{
+                        console.log("데이터 없음.")
                     }
                 };
 
@@ -98,7 +102,9 @@
         .catch((err) =>{
             console.error("Error accessing media devices.", err);
         });
-
+        
+        document.getElementById('save-video').addEventListener('click', saveVideo);
+        
         function uploadvideoToServer(blob){
             const formData = new FormData();
             console.log(`Blob size: ${blob.size} bytes`);

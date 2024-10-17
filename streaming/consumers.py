@@ -13,6 +13,7 @@ class StreamConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         stream_url = "http://10.0.66.136:81/stream"
+        print("연결 성공")
         await self.send(stream_url)
         
 
@@ -38,6 +39,11 @@ class StreamConsumer(AsyncWebsocketConsumer):
         try:
             process = await asyncio.create_subprocess_exec(*command)
             await process.wait()
+
+            while True:
+                await asyncio.sleep(1)
+                if process.returncode is not None:
+                    break
 
             if process.returncode == 0:
                 await self.send("비디오 저장 성공!!!!")

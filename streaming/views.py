@@ -11,51 +11,7 @@ def main(request):
     data = Videos.objects.all()
     return render(request,'streaming.html',{'data':data})
 
-#Arduino를 이용한 영상 받아서 뿌려주고 1분 단위로 영상 전달하게 설정
 
-from django.http import StreamingHttpResponse, HttpResponse
-from django.utils.http import http_date
-import os
-from django.conf import settings
-import re
-
-def get_file_chunk(file_path, offset=0, chunk_size=8192):
-    with open(file_path, 'rb')as f:
-        f.seek(offset)
-        while True:
-            data = f.read(chunk_size)
-            if not data:
-                break
-            yield data
-
-def stream_video(request, filename):
-    file_path = os.path.join(settings.MEDIA_ROOT, filename)
-
-    if not os.path.exists(file_path):
-        return HttpResponse(status=404)
-    
-    range_header = request.META.get('HTTP_RANGE','').strip()
-    range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
-
-    file_size = os.path.getsize(file_path)
-    start = 0
-    end = file_size - 1
-
-    if range_match:
-        start = int(range_match.group(1))
-        if range_match.group(2):
-            end = int(range_match.group(2))
-
-    content_lenght = (end - start)+1
-    response = StreamingHttpResponse(get_file_chunk(file_path, offset=start),status=206)
-    response['Content-Length'] = str(content_lenght)
-    response['Content-Range'] = f'bytes {start} - {end}/{file_size}'
-    response['Accept-Ranges'] = 'bytes'
-    response['Last-Modified'] = http_date(os.path.getmtime(file_path))
-    response['Cache-Control'] = 'no-cache'
-    response['Content-Type'] = 'video/mp4'
-
-    return response
 
 import os
 from django.conf import settings
@@ -65,24 +21,38 @@ from django.views.decorators.csrf import csrf_exempt
 def upload_video(request):
     return render(request,'upload.html')
 
+import ffmpeg
 import datetime
 import subprocess
 @csrf_exempt
 def upload(request):
     if request.method == "POST" and request.FILES['video']:
-        video_file = request.FILES['video']
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-        save_path = os.path.join(settings.MEDIA_ROOT, 'video', f"{timestamp}.mp4")
+        if 'video' in request.FILES:
+            video_file = request.FILES['video']
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
+            save_path = os.path.join(settings.MEDIA_ROOT, 'video', f"{timestamp}.webm")
 
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-        with open(save_path, 'wb+')as f:
-            for chunk in video_file.chunks():
-                f.write(chunk)
-        output_path = save_path.replace('.webm', '.mp4')
-        command = ['ffmpeg', '-i', save_path, output_path]
-        subprocess.run(command)
+            try:
+                    # 웹에서 업로드된 비디오 저장
+                    with open(save_path, 'wb+') as f:
+                        for chunk in video_file.chunks():
+                            f.write(chunk)
 
-        return JsonResponse({"message":"비디오 업로드 성공",'file_path':save_path})
-    
-    return JsonResponse({"error":"POST로 전달 해야합니다."},status=400)
+                    # 변환할 경로 설정
+                    output_path = save_path.replace('.webm', '.mp4')
+                    command = ['ffmpeg', '-i', save_path, output_path]
+                    result = subprocess.run(command, check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+                    return JsonResponse({"message": "비디오 업로드 및 변환 성공", 'file_path': output_path})
+
+            except Exception as e:
+                # 오류 발생 시 로그 출력
+                print(f"Error during video processing: {str(e)}")
+                return JsonResponse({"error": "비디오 처리 중 오류가 발생했습니다."}, status=500)
+
+        return JsonResponse({"error": "비디오 파일이 필요합니다."}, status=400)
+
+    return JsonResponse({"error": "POST로 전달 해야합니다."}, status=400)
+
